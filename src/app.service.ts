@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
 import { DomainRecord, inProgress } from './dto';
 import { exec } from 'child_process';
@@ -6,6 +6,7 @@ import { exec } from 'child_process';
 @Injectable()
 export class AppService {
   private supabase: SupabaseClient;
+  private readonly logger = new Logger(AppService.name);
 
   constructor() {
     this.supabase = createClient(
@@ -21,23 +22,25 @@ export class AppService {
       `${scriptPath} ${domainId} ${domain} ${targetDomain}`,
       (error, stdout, stderr) => {
         if (error) {
-          console.error(`Error: ${error}`);
+          this.logger.error(`Error: ${error}`);
           return;
         }
-        console.log(`stdout: ${stdout}`);
-        console.error(`stderr: ${stderr}`);
+        this.logger.log(`stdout: ${stdout}`);
+        this.logger.error(`stderr: ${stderr}`);
       },
     );
 
-    console.log('Script execution started');
+    this.logger.log('Script execution started');
   }
   async createDomain(domainDetails: DomainRecord): Promise<DomainRecord> {
+    this.logger.log('Start new domain setup');
     const { data, error } = await this.supabase
       .from('domains')
       .insert({ ...domainDetails, status: inProgress })
       .select();
 
     if (error) throw new Error(error.message);
+    this.logger.log('Finished creating domain in database. ID: ', data[0].id);
     this.executeScript(data[0].id, data[0].domain, data[0].target_domain);
     return data[0];
   }
