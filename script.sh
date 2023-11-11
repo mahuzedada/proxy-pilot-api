@@ -12,7 +12,7 @@ NGINX_DIRECTORY="/etc/nginx/sites-enabled"
 # Function to update status via API
 update_status() {
   local status="$1"
-  local url="http://localhost:3000/$DOMAIN_ID/$status"
+  local url="http://localhost:5642/$DOMAIN_ID/$status"
 
   echo "Calling API URL: $url"
   curl -X PATCH "$url"
