@@ -16,7 +16,7 @@ export class AppService {
   }
 
   executeScript(domainId: string, domain: string, targetDomain: string): void {
-    const scriptPath = './script.sh';
+    const scriptPath = process.env.SCRIPT_PATH;
 
     exec(
       `${scriptPath} ${domainId} ${domain} ${targetDomain}`,
