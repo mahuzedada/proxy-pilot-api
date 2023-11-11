@@ -19,7 +19,7 @@ export class AppService {
     const scriptPath = process.env.SCRIPT_PATH;
 
     exec(
-      `${scriptPath} ${domainId} ${domain} ${targetDomain}`,
+      `sudo ${scriptPath} ${domainId} ${domain} ${targetDomain}`,
       (error, stdout, stderr) => {
         if (error) {
           this.logger.error(`Error: ${error}`);
