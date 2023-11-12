@@ -7,5 +7,5 @@ module.exports = {
     'post-deploy': 'npm run post-deploy',
   },
   appName: require('./package.json').name,
-  appsDirectoryPath: '/home/ubuntu',
+  appsDirectoryPath: '/home/ec2-user',
 };
