@@ -1,6 +1,6 @@
 module.exports = {
   options: {
-    user: 'ubuntu',
+    user: 'ec2-user',
     port: '22',
     repo: 'git@github.com:mahuzedada/proxy-pilot-api.git',
     'pre-deploy-local': '',
