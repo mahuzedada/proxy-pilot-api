@@ -15,7 +15,7 @@ module.exports = {
   deploy: {
     production: {
       ...options,
-      host: 'procamp-dev',
+      host: 'afro-proxy',
       ref: 'origin/main',
       'post-deploy': `${options['post-deploy']} && chmod +x ./script.sh && pm2 reload ecosystem.dev.config.js`,
       path: join(appsDirectoryPath, appName),
