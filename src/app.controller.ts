@@ -23,34 +23,34 @@ export class AppController {
     return this.service.createDomain(domainDetails);
   }
 
-  @Post('/skip-setup')
+  @Post('/upsert')
   async createDomainSkipSetup(@Body() domainDetails: DomainRecord) {
     this.logger.log('Received POST request - createDomainSkipSetup');
-    return this.service.createDomain(domainDetails, true);
+    return this.service.upsertDomain(domainDetails);
   }
 
-  @Patch('/:domainId/proxy/:status')
+  @Patch('/:domain/proxy/:status')
   async updateDomainProxyStatus(
-    @Param('domainId') domainId: number,
+    @Param('domain') domain: string,
     @Param('status') status: string,
   ) {
     this.logger.log('Received PATCH request - updateStatusDomain');
-    return this.service.updateDomainProxyStatus(domainId, status);
+    return this.service.updateDomainProxyStatus(domain, status);
   }
 
-  @Patch('/:domainId/certificate/:status')
+  @Patch('/:domain/certificate/:status')
   async updateDomainCertificateStatus(
-    @Param('domainId') domainId: number,
+    @Param('domain') domain: string,
     @Param('status') status: string,
   ) {
     this.logger.log('Received PATCH request - updateStatusDomain');
-    return this.service.updateDomainCertificateStatus(domainId, status);
+    return this.service.updateDomainCertificateStatus(domain, status);
   }
 
-  @Get(':id')
-  async getDomain(@Param('id') domainId: string) {
-    this.logger.log(`Received Get request - getDomain - domainId: ${domainId}`);
-    return this.service.getDomain(domainId);
+  @Get(':domain')
+  async getDomain(@Param('domain') domain: string) {
+    this.logger.log(`Received Get request - getDomain - domain: ${domain}`);
+    return this.service.getDomain(domain);
   }
 
   @Get('/user/:userId/domains')
@@ -62,10 +62,10 @@ export class AppController {
   }
 
   @Delete(':id')
-  async deleteDomain(@Param('id') domainId: string) {
+  async deleteDomain(@Param('domain') domain: string) {
     this.logger.log(
-      `Received Delete request - deleteDomain - domainId: ${domainId}`,
+      `Received Delete request - deleteDomain - domain: ${domain}`,
     );
-    return this.service.deleteDomain(domainId);
+    return this.service.deleteDomain(domain);
   }
 }

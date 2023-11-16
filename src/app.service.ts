@@ -15,11 +15,11 @@ export class AppService {
     );
   }
 
-  executeScript(domainId: string, domain: string, targetDomain: string): void {
+  executeScript(domain: string, targetDomain: string): void {
     const scriptPath = process.env.SCRIPT_PATH;
 
     exec(
-      `sudo ${scriptPath} ${domainId} ${domain} ${targetDomain}`,
+      `sudo ${scriptPath} ${domain} ${targetDomain}`,
       (error, stdout, stderr) => {
         if (error) {
           this.logger.error(`Error: ${error}`);
@@ -32,10 +32,11 @@ export class AppService {
 
     this.logger.log('Script execution started');
   }
-  async createDomain(
-    domainDetails: DomainRecord,
-    skipSetup?: boolean,
-  ): Promise<DomainRecord> {
+
+  /*
+    Meant to be used by end-users to create new domains.
+   */
+  async createDomain(domainDetails: DomainRecord): Promise<DomainRecord> {
     this.logger.log('Start new domain setup');
     const { data, error } = await this.supabase
       .from('domains')
@@ -44,20 +45,37 @@ export class AppService {
 
     if (error) throw new Error(error.message);
     this.logger.log('Finished creating domain in database. ID: ', data[0].id);
-    if (!skipSetup) {
-      this.executeScript(data[0].id, data[0].domain, data[0].targetDomain);
-    }
+
+    this.executeScript(data[0].domain, data[0].targetDomain);
+
+    return data[0];
+  }
+
+  /*
+    Meant to be used by system to update or insert existing domains.
+   */
+  async upsertDomain(domainDetails: DomainRecord): Promise<DomainRecord> {
+    this.logger.log('Start new domain setup');
+    const { data, error } = await this.supabase
+      .from('domains')
+      .upsert(domainDetails)
+      .select();
+
+    if (error) throw new Error(error.message);
+
+    this.logger.log('Finished upsert domain in database: ', data[0].domain);
+
     return data[0];
   }
 
   async updateDomainProxyStatus(
-    domainId: number,
+    domain: string,
     status: string,
   ): Promise<DomainRecord> {
     const { data, error } = await this.supabase
       .from('domains')
       .update({ proxyStatus: status })
-      .eq('id', domainId)
+      .eq('domain', domain)
       .select();
 
     if (error) throw new Error(error.message);
@@ -65,24 +83,24 @@ export class AppService {
   }
 
   async updateDomainCertificateStatus(
-    domainId: number,
+    domain: string,
     status: string,
   ): Promise<DomainRecord> {
     const { data, error } = await this.supabase
       .from('domains')
       .update({ certificateStatus: status })
-      .eq('id', domainId)
+      .eq('domain', domain)
       .select();
 
     if (error) throw new Error(error.message);
     return data[0];
   }
 
-  async getDomain(domainId: string): Promise<DomainRecord> {
+  async getDomain(domain: string): Promise<DomainRecord> {
     const { data, error } = await this.supabase
       .from('domains')
       .select('*')
-      .eq('id', domainId)
+      .eq('domain', domain)
       .single();
 
     if (error) throw new Error(error.message);
@@ -99,13 +117,13 @@ export class AppService {
     return data;
   }
 
-  async deleteDomain(domainId: string): Promise<string> {
+  async deleteDomain(domain: string): Promise<string> {
     const { error } = await this.supabase
       .from('domains')
       .delete()
-      .match({ id: domainId });
+      .match({ domain: domain });
 
     if (error) throw new Error(error.message);
-    return `Domain with ID ${domainId} deleted successfully.`;
+    return `Domain ${domain} deleted successfully.`;
   }
 }

@@ -1,9 +1,8 @@
 #!/bin/bash
 
 # Parameters
-DOMAIN_ID="$1"
-DOMAIN="$2"
-TARGET_DOMAIN="$3"
+DOMAIN="$1"
+TARGET_DOMAIN="$2"
 
 # Constants
 NGINX_DIRECTORY="/etc/nginx/sites-enabled"
@@ -12,7 +11,7 @@ NGINX_DIRECTORY="/etc/nginx/sites-enabled"
 # Function to update status via API
 update_status() {
   local status="$1"
-  local url="http://localhost:5642/$DOMAIN_ID/proxy/$status"
+  local url="http://localhost:5642/$DOMAIN/proxy/$status"
 
   echo "Calling API URL: $url"
   curl -X PATCH "$url"
