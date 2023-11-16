@@ -9,6 +9,7 @@ import {
   Logger,
 } from '@nestjs/common';
 import { AppService } from './app.service';
+import { DomainRecord } from './dto';
 
 @Controller()
 export class AppController {
@@ -23,7 +24,7 @@ export class AppController {
   }
 
   @Post('/skip-setup')
-  async createDomainSkipSetup(@Body() domainDetails: any) {
+  async createDomainSkipSetup(@Body() domainDetails: DomainRecord) {
     this.logger.log('Received POST request - createDomainSkipSetup');
     return this.service.createDomain(domainDetails, true);
   }

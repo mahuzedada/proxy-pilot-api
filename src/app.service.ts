@@ -45,7 +45,7 @@ export class AppService {
     if (error) throw new Error(error.message);
     this.logger.log('Finished creating domain in database. ID: ', data[0].id);
     if (!skipSetup) {
-      this.executeScript(data[0].id, data[0].domain, data[0].target_domain);
+      this.executeScript(data[0].id, data[0].domain, data[0].targetDomain);
     }
     return data[0];
   }
@@ -56,7 +56,7 @@ export class AppService {
   ): Promise<DomainRecord> {
     const { data, error } = await this.supabase
       .from('domains')
-      .update({ proxy_status: status })
+      .update({ proxyStatus: status })
       .eq('id', domainId)
       .select();
 
@@ -70,7 +70,7 @@ export class AppService {
   ): Promise<DomainRecord> {
     const { data, error } = await this.supabase
       .from('domains')
-      .update({ certificate_status: status })
+      .update({ certificateStatus: status })
       .eq('id', domainId)
       .select();
 
@@ -93,7 +93,7 @@ export class AppService {
     const { data, error } = await this.supabase
       .from('domains')
       .select('*')
-      .eq('user_id', userId);
+      .eq('userId', userId);
 
     if (error) throw new Error(error.message);
     return data;

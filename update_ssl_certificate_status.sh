@@ -46,11 +46,11 @@ for file in /etc/nginx/sites-enabled/*; do
     json_payload=$(cat <<EOF
 {
   "domain": "$domain",
-  "target_domain": "$target_domain",
-  "user_id": "83396b1d-80fa-4b8d-a0a3-6292ac7683a9",
-  "certificate_expiration": "$certificate_expiration",
-  "certificate_status": "$certificate_status",
-  "proxy_status": "active"
+  "targetDomain": "$target_domain",
+  "userId": "83396b1d-80fa-4b8d-a0a3-6292ac7683a9",
+  "expiryDate": "$certificate_expiration",
+  "certificateStatus": "$certificate_status",
+  "proxyStatus": "active"
 }
 EOF
 )
