@@ -22,13 +22,28 @@ export class AppController {
     return this.service.createDomain(domainDetails);
   }
 
-  @Patch('/:domainId/:status')
-  async updateStatusDomain(
+  @Post('/skip-setup')
+  async createDomainSkipSetup(@Body() domainDetails: any) {
+    this.logger.log('Received POST request - createDomainSkipSetup');
+    return this.service.createDomain(domainDetails, true);
+  }
+
+  @Patch('/:domainId/proxy/:status')
+  async updateDomainProxyStatus(
     @Param('domainId') domainId: number,
     @Param('status') status: string,
   ) {
     this.logger.log('Received PATCH request - updateStatusDomain');
-    return this.service.updateDomainStatus(domainId, status);
+    return this.service.updateDomainProxyStatus(domainId, status);
+  }
+
+  @Patch('/:domainId/certificate/:status')
+  async updateDomainCertificateStatus(
+    @Param('domainId') domainId: number,
+    @Param('status') status: string,
+  ) {
+    this.logger.log('Received PATCH request - updateStatusDomain');
+    return this.service.updateDomainCertificateStatus(domainId, status);
   }
 
   @Get(':id')

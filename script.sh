@@ -12,7 +12,7 @@ NGINX_DIRECTORY="/etc/nginx/sites-enabled"
 # Function to update status via API
 update_status() {
   local status="$1"
-  local url="http://localhost:5642/$DOMAIN_ID/$status"
+  local url="http://localhost:5642/$DOMAIN_ID/proxy/$status"
 
   echo "Calling API URL: $url"
   curl -X PATCH "$url"
@@ -43,9 +43,9 @@ server {
     proxy_redirect off;
     proxy_set_header Connection "";
     proxy_set_header Authorization '';
-    proxy_set_header Host $bucket;
-    proxy_set_header X-Real-IP $remote_addr;
-    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    proxy_set_header Host \$bucket;
+    proxy_set_header X-Real-IP \$remote_addr;
+    proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
     proxy_hide_header x-amz-id-2;
     proxy_hide_header x-amz-request-id;
     proxy_hide_header x-amz-meta-server-side-encryption;
@@ -54,7 +54,7 @@ server {
     proxy_ignore_headers Set-Cookie;
     proxy_intercept_errors on;
     add_header Cache-Control max-age=31536000;
-    proxy_pass http://$bucket;
+    proxy_pass http://\$bucket;
   }
 }
 EOF

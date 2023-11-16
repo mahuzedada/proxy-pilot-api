@@ -5,8 +5,9 @@ export interface DomainRecord {
   domain: string;
   target_domain: string;
   user_id: string;
-  expiration?: string;
-  status?: string;
+  certificate_expiration?: string;
+  certificate_status?: string;
+  proxy_status?: string;
 }
 
 export const inProgress = 'in-progress';

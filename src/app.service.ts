@@ -1,6 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
-import { DomainRecord, inProgress } from './dto';
+import { DomainRecord } from './dto';
 import { exec } from 'child_process';
 
 @Injectable()
@@ -32,26 +32,45 @@ export class AppService {
 
     this.logger.log('Script execution started');
   }
-  async createDomain(domainDetails: DomainRecord): Promise<DomainRecord> {
+  async createDomain(
+    domainDetails: DomainRecord,
+    skipSetup?: boolean,
+  ): Promise<DomainRecord> {
     this.logger.log('Start new domain setup');
     const { data, error } = await this.supabase
       .from('domains')
-      .insert({ ...domainDetails, status: inProgress })
+      .insert(domainDetails)
       .select();
 
     if (error) throw new Error(error.message);
     this.logger.log('Finished creating domain in database. ID: ', data[0].id);
-    this.executeScript(data[0].id, data[0].domain, data[0].target_domain);
+    if (!skipSetup) {
+      this.executeScript(data[0].id, data[0].domain, data[0].target_domain);
+    }
     return data[0];
   }
 
-  async updateDomainStatus(
+  async updateDomainProxyStatus(
     domainId: number,
     status: string,
   ): Promise<DomainRecord> {
     const { data, error } = await this.supabase
       .from('domains')
-      .update({ status: status })
+      .update({ proxy_status: status })
+      .eq('id', domainId)
+      .select();
+
+    if (error) throw new Error(error.message);
+    return data[0];
+  }
+
+  async updateDomainCertificateStatus(
+    domainId: number,
+    status: string,
+  ): Promise<DomainRecord> {
+    const { data, error } = await this.supabase
+      .from('domains')
+      .update({ certificate_status: status })
       .eq('id', domainId)
       .select();
 
