@@ -23,10 +23,16 @@ export class AppController {
     return this.service.createDomain(domainDetails);
   }
 
-  @Post('/upsert')
+  @Patch('/upsert')
   async createDomainSkipSetup(@Body() domainDetails: DomainRecord) {
     this.logger.log('Received POST request - createDomainSkipSetup');
     return this.service.upsertDomain(domainDetails);
+  }
+
+  @Patch('/:domain/renew')
+  async renewCertificate(@Param('domain') domain: string) {
+    this.logger.log('Received POST request - renewCertificate');
+    return this.service.renewCertificate(domain);
   }
 
   @Patch('/:domain/proxy/:status')
@@ -59,6 +65,11 @@ export class AppController {
       `Received Get request - getDomainsByUser - userId: ${userId}`,
     );
     return this.service.getDomainsByUser(userId);
+  }
+
+  @Get('/alert/:message')
+  async alert(@Param('message') message: string) {
+    this.logger.error(`!!! ALERT !!!: ${message}`);
   }
 
   @Delete(':id')

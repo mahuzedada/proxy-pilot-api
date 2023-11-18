@@ -68,6 +68,23 @@ export class AppService {
     return data[0];
   }
 
+  async renewCertificate(domain: string) {
+    this.logger.log(`Start renew certificate: ${domain}`);
+
+    const scriptPath = process.env.RENEW_SCRIPT_PATH;
+
+    exec(`sudo ${scriptPath} ${domain}`, (error, stdout, stderr) => {
+      if (error) {
+        this.logger.error(`Error: ${error}`);
+        return;
+      }
+      this.logger.log(`stdout: ${stdout}`);
+      this.logger.error(`stderr: ${stderr}`);
+    });
+
+    this.logger.log('Renew script execution started');
+  }
+
   async updateDomainProxyStatus(
     domain: string,
     status: string,

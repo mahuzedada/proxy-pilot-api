@@ -5,8 +5,17 @@ DOMAIN="$1"
 TARGET_DOMAIN="$2"
 
 # Constants
-NGINX_DIRECTORY="/etc/nginx/sites-enabled"
-#NGINX_DIRECTORY="./nginx"
+#NGINX_DIRECTORY="/etc/nginx/sites-enabled"
+NGINX_DIRECTORY="./nginx"
+
+# Function to alert via API in case NGINX doesn't start
+alert() {
+  local message="$1"
+  local url="http://localhost:5642/alert/$message"
+
+  echo "SENDING ALERT TO API: $url"
+  curl -X GET "$url"
+}
 
 # Function to update status via API
 update_status() {
@@ -27,7 +36,7 @@ update_error_status() {
 # Check if NGINX config file exists
 CONFIG_FILE="$NGINX_DIRECTORY/$DOMAIN"
 if [ -f "$CONFIG_FILE" ]; then
-    update_status "NGINX-config-exists"
+    exit 1
 else
     # Create NGINX config file
     cat <<EOF > "$CONFIG_FILE"
@@ -64,8 +73,13 @@ fi
 if service nginx restart; then
     update_status "NGINX-restarted"
 else
-    update_status "NGINX-restart-failed"
-    exit 1
+    rm -f "$CONFIG_FILE"
+    if service nginx restart; then
+        exit 1
+    else
+        alert "NGINX-RESTART-FAILED"
+        exit 1
+    fi
 fi
 
 # Run Certbot and handle error

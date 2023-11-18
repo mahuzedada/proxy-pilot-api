@@ -59,7 +59,7 @@ EOF
     echo "Sending POST request for domain: $domain" >> "$log_file"
     echo "$json_payload" >> "$log_file"
 
-    response=$(curl -s -o response.txt -w "%{http_code}" -X POST "http://localhost:5642/upsert" -H "Content-Type: application/json" -d "$json_payload")
+    response=$(curl -s -o response.txt -w "%{http_code}" -X PATCH "http://localhost:5642/upsert" -H "Content-Type: application/json" -d "$json_payload")
 
     # Log response and status code
     echo "Response Code: $response" >> "$log_file"
