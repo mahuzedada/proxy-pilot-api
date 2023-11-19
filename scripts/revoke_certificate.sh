@@ -23,7 +23,7 @@ else
 fi
 
 # Step 2: Remove certificate files
-certbot revoke --cert-name $DOMAIN
+certbot delete --cert-name $DOMAIN
 
 # Step 3: Remove the Nginx configuration file for the domain
 NGINX_CONF="/etc/nginx/sites-enabled/$DOMAIN"
