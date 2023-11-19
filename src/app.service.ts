@@ -15,22 +15,21 @@ export class AppService {
     );
   }
 
-  executeScript(domain: string, targetDomain: string): void {
-    const scriptPath = process.env.SCRIPT_PATH;
-
-    exec(
-      `sudo ${scriptPath} ${domain} ${targetDomain}`,
-      (error, stdout, stderr) => {
+  executeScript(script: string): Promise<void> {
+    return new Promise((resolve, reject) => {
+      exec(script, (error, stdout, stderr) => {
         if (error) {
           this.logger.error(`Error: ${error}`);
+          reject();
           return;
         }
         this.logger.log(`stdout: ${stdout}`);
         this.logger.error(`stderr: ${stderr}`);
-      },
-    );
+        resolve();
+      });
 
-    this.logger.log('Script execution started');
+      this.logger.log('Script execution started');
+    });
   }
 
   /*
@@ -46,7 +45,9 @@ export class AppService {
     if (error) throw new Error(error.message);
     this.logger.log('Finished creating domain in database. ID: ', data[0].id);
 
-    this.executeScript(data[0].domain, data[0].targetDomain);
+    await this.executeScript(
+      `sudo ${process.env.NEW_DOMAIN_SETUP_SCRIPT_PATH} ${data[0].domain} ${data[0].targetDomain}`,
+    );
 
     return data[0];
   }
@@ -66,23 +67,6 @@ export class AppService {
     this.logger.log('Finished upsert domain in database: ', data[0].domain);
 
     return data[0];
-  }
-
-  async renewCertificate(domain: string) {
-    this.logger.log(`Start renew certificate: ${domain}`);
-
-    const scriptPath = process.env.RENEW_SCRIPT_PATH;
-
-    exec(`sudo ${scriptPath} ${domain}`, (error, stdout, stderr) => {
-      if (error) {
-        this.logger.error(`Error: ${error}`);
-        return;
-      }
-      this.logger.log(`stdout: ${stdout}`);
-      this.logger.error(`stderr: ${stderr}`);
-    });
-
-    this.logger.log('Renew script execution started');
   }
 
   async updateDomainProxyStatus(
@@ -135,6 +119,10 @@ export class AppService {
   }
 
   async deleteDomain(domain: string): Promise<string> {
+    await this.executeScript(
+      `sudo ${process.env.REVOKE_CERTIFICATE_SCRIPT_PATH} ${domain}`,
+    );
+
     const { error } = await this.supabase
       .from('domains')
       .delete()
