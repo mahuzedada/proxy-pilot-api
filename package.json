@@ -6,7 +6,7 @@
   "private": true,
   "license": "UNLICENSED",
   "scripts": {
-    "post-deploy": "npm i && npm run prebuild && npm run build && chmod -R +x /home/ec2-user/proxy-pilot-api/source/scripts",
+    "post-deploy": "npm i && npm run prebuild && npm run build",
     "deploy:dev": "pm2 deploy ecosystem.dev.config.js production",
     "prebuild": "rimraf dist",
     "build": "nest build",
