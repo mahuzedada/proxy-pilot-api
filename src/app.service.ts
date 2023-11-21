@@ -1,7 +1,16 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable, Logger } from '@nestjs/common';
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
 import { DomainRecord } from './dto';
 import { exec } from 'child_process';
+
+class MissingARecordException extends HttpException {
+  constructor() {
+    super(
+      'A Record not found for the provided domain',
+      HttpStatus.UNPROCESSABLE_ENTITY,
+    );
+  }
+}
 
 @Injectable()
 export class AppService {
@@ -46,21 +55,24 @@ export class AppService {
     Meant to be used by end-users to create new domains.
    */
   async createDomain(domainDetails: DomainRecord): Promise<boolean> {
-    return this.checkARecord(domainDetails.domain);
-    // this.logger.log('Start new domain setup');
-    // const { data, error } = await this.supabase
-    //   .from('domains')
-    //   .insert(domainDetails)
-    //   .select();
-    //
-    // if (error) throw new Error(error.message);
-    // this.logger.log('Finished creating domain in database. ID: ', data[0].id);
-    //
-    // await this.executeScript(
-    //   `sudo ${process.env.NEW_DOMAIN_SETUP_SCRIPT_PATH} ${data[0].domain} ${data[0].targetDomain}`,
-    // );
-    //
-    // return data[0];
+    if (!(await this.checkARecord(domainDetails.domain))) {
+      throw new MissingARecordException();
+    }
+
+    this.logger.log('Start new domain setup');
+    const { data, error } = await this.supabase
+      .from('domains')
+      .insert(domainDetails)
+      .select();
+
+    if (error) throw new Error(error.message);
+    this.logger.log('Finished creating domain in database. ID: ', data[0].id);
+
+    await this.executeScript(
+      `sudo ${process.env.NEW_DOMAIN_SETUP_SCRIPT_PATH} ${data[0].domain} ${data[0].targetDomain}`,
+    );
+
+    return data[0];
   }
 
   /*
