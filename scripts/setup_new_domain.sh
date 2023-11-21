@@ -5,8 +5,8 @@ DOMAIN="$1"
 TARGET_DOMAIN="$2"
 
 # Constants
-#NGINX_DIRECTORY="/etc/nginx/sites-enabled"
-NGINX_DIRECTORY="./nginx"
+NGINX_DIRECTORY="/etc/nginx/sites-enabled"
+#NGINX_DIRECTORY="./nginx"
 
 # Function to alert via API in case NGINX doesn't start
 alert() {
@@ -33,13 +33,11 @@ update_error_status() {
   update_status "$formatted_error"
 }
 
-# Check if NGINX config file exists
+# Define NGINX config file path
 CONFIG_FILE="$NGINX_DIRECTORY/$DOMAIN"
-if [ -f "$CONFIG_FILE" ]; then
-    exit 1
-else
-    # Create NGINX config file
-    cat <<EOF > "$CONFIG_FILE"
+
+# Create or overwrite NGINX config file
+cat <<EOF > "$CONFIG_FILE"
 server {
   server_name $DOMAIN;
   set \$bucket "$TARGET_DOMAIN";
@@ -66,8 +64,9 @@ server {
   }
 }
 EOF
-    update_status "NGINX-config-created"
-fi
+
+# Update status
+update_status "NGINX-config-created"
 
 # Restart NGINX
 if service nginx restart; then

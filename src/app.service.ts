@@ -32,24 +32,35 @@ export class AppService {
     });
   }
 
+  async checkARecord(domain: string): Promise<boolean> {
+    try {
+      await this.executeScript(
+        `sudo ${process.env.CHECK_A_RECORD_SCRIPT_PATH} ${domain}`,
+      );
+      return true;
+    } catch (e) {
+      return false;
+    }
+  }
   /*
     Meant to be used by end-users to create new domains.
    */
-  async createDomain(domainDetails: DomainRecord): Promise<DomainRecord> {
-    this.logger.log('Start new domain setup');
-    const { data, error } = await this.supabase
-      .from('domains')
-      .insert(domainDetails)
-      .select();
-
-    if (error) throw new Error(error.message);
-    this.logger.log('Finished creating domain in database. ID: ', data[0].id);
-
-    await this.executeScript(
-      `sudo ${process.env.NEW_DOMAIN_SETUP_SCRIPT_PATH} ${data[0].domain} ${data[0].targetDomain}`,
-    );
-
-    return data[0];
+  async createDomain(domainDetails: DomainRecord): Promise<boolean> {
+    return this.checkARecord(domainDetails.domain);
+    // this.logger.log('Start new domain setup');
+    // const { data, error } = await this.supabase
+    //   .from('domains')
+    //   .insert(domainDetails)
+    //   .select();
+    //
+    // if (error) throw new Error(error.message);
+    // this.logger.log('Finished creating domain in database. ID: ', data[0].id);
+    //
+    // await this.executeScript(
+    //   `sudo ${process.env.NEW_DOMAIN_SETUP_SCRIPT_PATH} ${data[0].domain} ${data[0].targetDomain}`,
+    // );
+    //
+    // return data[0];
   }
 
   /*
