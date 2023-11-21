@@ -4,9 +4,9 @@ import { DomainRecord } from './dto';
 import { exec } from 'child_process';
 
 class MissingARecordException extends HttpException {
-  constructor() {
+  constructor(domain: string) {
     super(
-      'A Record not found for the provided domain',
+      `An A Record not found for the provided domain: ${domain}`,
       HttpStatus.UNPROCESSABLE_ENTITY,
     );
   }
@@ -56,9 +56,8 @@ export class AppService {
    */
   async createDomain(domainDetails: DomainRecord): Promise<boolean> {
     if (!(await this.checkARecord(domainDetails.domain))) {
-      throw new MissingARecordException();
+      throw new MissingARecordException(domainDetails.domain);
     }
-
     this.logger.log('Start new domain setup');
     const { data, error } = await this.supabase
       .from('domains')
