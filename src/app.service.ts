@@ -6,7 +6,7 @@ import { exec } from 'child_process';
 class MissingARecordException extends HttpException {
   constructor(domain: string) {
     super(
-      `An A Record not found for the provided domain: ${domain}`,
+      `An A Record was not found for the provided domain: ${domain}`,
       HttpStatus.UNPROCESSABLE_ENTITY,
     );
   }
@@ -54,7 +54,7 @@ export class AppService {
   /*
     Meant to be used by end-users to create new domains.
    */
-  async createDomain(domainDetails: DomainRecord): Promise<boolean> {
+  async createDomain(domainDetails: DomainRecord): Promise<DomainRecord> {
     if (!(await this.checkARecord(domainDetails.domain))) {
       throw new MissingARecordException(domainDetails.domain);
     }
@@ -67,11 +67,23 @@ export class AppService {
     if (error) throw new Error(error.message);
     this.logger.log('Finished creating domain in database. ID: ', data[0].id);
 
-    await this.executeScript(
-      `sudo ${process.env.NEW_DOMAIN_SETUP_SCRIPT_PATH} ${data[0].domain} ${data[0].targetDomain}`,
-    );
+    try {
+      await this.executeScript(
+        `sudo ${process.env.NEW_DOMAIN_SETUP_SCRIPT_PATH} ${data[0].domain} ${data[0].targetDomain}`,
+      );
+    } catch (e) {
+      this.logger.log(e);
+    }
 
-    return data[0];
+    try {
+      await this.executeScript(
+        `sudo ${process.env.UPDATE_CERTIFICATES_STATUS_SCRIPT_PATH}`,
+      );
+    } catch (e) {
+      this.logger.log(e);
+    }
+
+    return this.getDomain(domainDetails.domain);
   }
 
   /*

@@ -86,5 +86,4 @@ if output=$(certbot -d "$DOMAIN" 2>&1); then
     update_status "Certbot-succeeded"
 else
     update_error_status "$output"
-    exit 1
 fi
